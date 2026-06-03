@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Code Explainer Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Groq-powered code reading studio</p>
+          <div class="brand-lockup">
+            <span class="brand-mark" aria-hidden="true"></span>
+            <div>
+              <h1>Code Explainer</h1>
+              <p class="hero-text">
+                A bright workspace for turning unfamiliar snippets into clean analysis, readable
+                explanations, fixes, variants, and complexity notes.
+              </p>
+            </div>
+          </div>
+          <div class="hero-chips">
+            <span class="chip chip-accent" id="hero-model">Groq model: openai/gpt-oss-120b</span>
+            <span class="chip">Three passes, one report</span>
+            <span class="chip">Ctrl + Enter runs analysis</span>
+          </div>
+        </div>
+
+        <aside class="hero-card" aria-label="What this app returns">
+          <p class="hero-card-label">What you get</p>
+          <ul class="hero-points">
+            <li>Line-by-line analysis of the snippet you paste</li>
+            <li>A cleaned-up explanation that is easier to read quickly</li>
+            <li>Fixes, alternate implementations, and complexity breakdowns</li>
+          </ul>
+        </aside>
+      </header>
+
+      <main class="workspace">
+        <section class="panel composer-panel" aria-labelledby="input-heading">
+          <div class="panel-head composer-head">
+            <div>
+              <p class="panel-kicker">Input</p>
+              <h2 id="input-heading">Editor</h2>
+            </div>
+            <div class="input-stats" aria-live="polite">
+              <span id="line-count">1 line</span>
+              <span id="char-count">0 chars</span>
+            </div>
+          </div>
+
+          <div class="sample-strip" aria-label="Quick samples">
+            <button type="button" class="sample-chip" data-sample="javascript">JS sample</button>
+            <button type="button" class="sample-chip" data-sample="python">Python sample</button>
+            <button type="button" class="sample-chip" data-sample="sql">SQL sample</button>
+          </div>
+
+          <div class="editor-shell">
+            <div class="editor-toolbar">
+              <div class="window-dots" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <div class="editor-toolbar-copy">
+                <span class="editor-title">Snippet editor</span>
+                <span class="editor-subtitle">Tab indents, Enter keeps indentation, Ctrl + Enter analyzes</span>
+              </div>
+            </div>
+
+            <div class="editor-frame">
+              <div id="line-gutter" class="line-gutter" aria-hidden="true">1</div>
+              <textarea
+                id="code-input"
+                spellcheck="false"
+                placeholder="// Paste code here and keep iterating on it. The diff viewer below compares your current draft with the previous analyzed snippet.&#10;&#10;function example(n) {&#10;  if (n &lt;= 1) return 1;&#10;  return example(n - 1) + example(n - 2);&#10;}"
+                rows="18"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="button" id="analyze-btn" class="btn btn-primary">
+              <span class="btn-label">Analyze</span>
+              <span class="btn-spinner" hidden aria-hidden="true"></span>
+            </button>
+            <button type="button" id="clear-btn" class="btn btn-ghost">Clear editor</button>
+          </div>
+
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+
+          <section class="diff-card" aria-labelledby="diff-heading">
+            <div class="mini-card-head">
+              <div>
+                <p class="panel-kicker">Diff</p>
+                <h3 id="diff-heading">Changes from previous snippet</h3>
+              </div>
+              <span id="diff-meta" class="diff-meta">Analyze a snippet once to create a baseline.</span>
+            </div>
+            <div class="diff-legend" aria-hidden="true">
+              <span class="legend-chip legend-add">Added</span>
+              <span class="legend-chip legend-remove">Removed</span>
+              <span class="legend-chip legend-same">Context</span>
+            </div>
+            <div id="diff-output" class="diff-view scroll-area">
+              <p class="diff-placeholder">
+                Your next draft will be compared line-by-line against the previous analyzed code.
+              </p>
+            </div>
+          </section>
+        </section>
+
+        <section class="panel results-panel" aria-labelledby="results-heading">
+          <div class="panel-head panel-head-results">
+            <div class="panel-head-left">
+              <p class="panel-kicker">Output</p>
+              <h2 id="results-heading">Analysis studio</h2>
+              <span id="results-meta" class="results-meta" aria-live="polite">
+                Results land here after the model finishes all three passes.
+              </span>
+            </div>
+            <button
+              type="button"
+              id="copy-section-btn"
+              class="btn btn-ghost btn-small"
+              title="Copy the visible section as plain text"
+            >
+              Copy section
+            </button>
+          </div>
+
+          <nav class="tabs" role="tablist" aria-label="Result sections">
+            <button type="button" class="tab is-active" data-tab="analysis" role="tab" aria-selected="true">
+              Analysis
+            </button>
+            <button type="button" class="tab" data-tab="readable" role="tab" aria-selected="false">
+              Readable rewrite
+            </button>
+            <button type="button" class="tab" data-tab="fixes" role="tab" aria-selected="false">
+              Fixes
+            </button>
+            <button type="button" class="tab tab-variants" data-tab="variants" role="tab" aria-selected="false">
+              Variants
+              <span class="tab-badge" id="variants-badge" hidden title="Readable and performance-first rewrites">
+                A/B
+              </span>
+            </button>
+            <button type="button" class="tab" data-tab="complexity" role="tab" aria-selected="false">
+              Complexity
+            </button>
+          </nav>
+
+          <div class="tab-panels">
+            <article class="tab-panel is-visible" id="panel-analysis" role="tabpanel">
+              <div class="markdown scroll-area" id="out-analysis"></div>
+            </article>
+            <article class="tab-panel" id="panel-readable" role="tabpanel" hidden>
+              <div class="markdown scroll-area" id="out-readable"></div>
+            </article>
+            <article class="tab-panel" id="panel-fixes" role="tabpanel" hidden>
+              <div class="markdown scroll-area" id="out-fixes"></div>
+            </article>
+            <article class="tab-panel" id="panel-variants" role="tabpanel" hidden>
+              <p class="variants-legend">
+                <span class="legend-read">A</span> readability-first
+                <span class="legend-sep">/</span>
+                <span class="legend-fast">B</span> performance-first
+              </p>
+              <div class="markdown markdown-variants scroll-area" id="out-variants"></div>
+            </article>
+            <article class="tab-panel" id="panel-complexity" role="tabpanel" hidden>
+              <div class="markdown scroll-area" id="out-complexity"></div>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span>
+          Runs locally with Groq. Set <code>GROQ_API_KEY</code> in <code>.env</code> and optionally
+          <code>GROQ_MODEL</code>.
+        </span>
+      </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>
